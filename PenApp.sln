@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29609.76
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PenApp", "PenApp\PenApp.csproj", "{CBEE773B-0464-46E2-90B4-A6BE85B4971D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CBEE773B-0464-46E2-90B4-A6BE85B4971D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CBEE773B-0464-46E2-90B4-A6BE85B4971D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CBEE773B-0464-46E2-90B4-A6BE85B4971D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CBEE773B-0464-46E2-90B4-A6BE85B4971D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {45EDCF96-6A34-45C2-8CC5-E8A54B77F9F3}
+	EndGlobalSection
+EndGlobal
