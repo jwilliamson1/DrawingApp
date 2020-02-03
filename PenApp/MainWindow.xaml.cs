@@ -22,6 +22,7 @@ using LanguageExt.ClassInstances;
 using static System.Console;
 using LanguageExt.SomeHelp;
 using LanguageExt.Attributes;
+using static SeqExtensions;
 namespace PenApp
 {
     /// <summary>
@@ -38,7 +39,10 @@ namespace PenApp
             var parseResult = Parsers.ParseCommands(text);
 
             var res = from cmds in parseResult
-                    select Interpret(cmds);
+                      select cmds;
+
+
+
 
             res.Match(_ => WriteLine("Success!"), WriteLine);
         }
