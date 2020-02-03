@@ -48,9 +48,9 @@ namespace PenApp
             public readonly int BrushSize;
             public SpecificPoint(Point point, bool draw, int brushSize)
             {
-                this.Point = point;
-                this.Draw = draw;
-                this.BrushSize = brushSize;
+                Point = point;
+                Draw = draw;
+                BrushSize = brushSize;
             }
 
             public static SpecificPoint Default()
