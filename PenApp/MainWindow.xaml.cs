@@ -14,7 +14,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using System.Xml.Serialization;
 using LanguageExt;
 using static LanguageExt.Prelude;
 using static System.Console;
@@ -35,12 +34,23 @@ namespace PenApp
             var parseResult = Parsers.ParseCommands(text);
 
             var res = from cmds in parseResult
-                      select SeqExt.mapAccumL(InterpretCmds, SpecificPoint.Default(), cmds);
+                      select SeqExt.mapAccumL(InterpretCmds, SpecificPoint.Default(), cmds).results.Flatten();
 
-            res.Match(_ => WriteLine("Success!"), WriteLine);
+            res.Match(sps => WritePoints(sps), WriteLine);
         }
 
-        [With]
+        public virtual Unit WritePoints(Seq<SpecificPoint> seqs)
+        {
+            foreach (var s in seqs)
+            {
+                this.inkCanvas1.Strokes.Add(
+                    new Stroke(new StylusPointCollection(new List<Point> { s.Point }), new DrawingAttributes(){Height = s.BrushSize, Width = s.BrushSize}));
+
+            }
+
+            return unit;
+        }
+
         public partial class SpecificPoint
         {
             public readonly Point Point;
@@ -57,6 +67,8 @@ namespace PenApp
             {
                 return new SpecificPoint(new Point(0, 0), false, 2);
             }
+
+            public SpecificPoint With(Point? Point = null, bool? Draw = null, int? BrushSize = null) => new SpecificPoint(Point ?? this.Point, Draw ?? this.Draw, BrushSize ?? this.BrushSize);
         }
 
         (SpecificPoint, Seq<SpecificPoint>) InterpretCmds(SpecificPoint specificPoint, Cmd cmd)
@@ -64,11 +76,11 @@ namespace PenApp
             switch (cmd)
             {
                 case PenUp pup:
-                    return (specificPoint.With(Draw: false), List(PenUpHandler(pup, specificPoint)).ToSeq());
+                    return (PenUpHandler(pup, specificPoint), List(PenUpHandler(pup, specificPoint)).ToSeq());
                 case PenDown pdown:
-                    return (specificPoint.With(Draw: true), List(PenDownHandler(pdown, specificPoint)).ToSeq());
+                    return (PenDownHandler(pdown, specificPoint), List(PenDownHandler(pdown, specificPoint)).ToSeq());
                 case StrokeSize size:
-                    return (specificPoint.With(BrushSize: specificPoint.BrushSize), List(StrokeSizeHandler(size, specificPoint)).ToSeq());
+                    return (StrokeSizeHandler(size, specificPoint), List(StrokeSizeHandler(size, specificPoint)).ToSeq());
                 case Move move:
                     return MoveHandler(move, specificPoint);
                     
@@ -109,69 +121,6 @@ namespace PenApp
                     return (specificPoint.With(Point: new Point(curX - paces, curY)), Enumerable.Range(-1 * curX, paces).Map(x => specificPoint.With(Point: new Point(Math.Abs(x), curY)))
                         .ToSeq());
             }
-        }
-
-        Unit Interpret(Seq<Cmd> cmds)
-        {
-            var penDown = false;
-            var point = new Point(0, 0);
-
-            cmds.Map((cmd) =>
-            {
-                switch (cmd)
-                {
-                    case PenUp pup:
-                        WriteLine("Pen up");
-                        penDown = false;
-                        break;
-                    case PenDown pdown:
-                        WriteLine("Pen Down");
-                        penDown = true;
-                        break;
-                    case Move mv:
-
-                        if (mv.Direction == Directions.North || mv.Direction == Directions.South)
-                        {
-                            for (int i = (int) point.Y; i < mv.Paces; i++)
-                            {
-                                point = new Point(point.X, mv.Paces);
-
-                                if (penDown)
-                                {
-                                    this.DrawPoint(point);
-                                }
-                            }
-
-                            for (int i = (int)point.X; i < mv.Paces; i++)
-                            {
-                                point = new Point(mv.Paces, point.Y);
-
-                                if (penDown)
-                                {
-                                    this.DrawPoint(point);
-                                }
-                            }
-                        }
-
-                        WriteLine($"Move {mv.Paces} to the {mv.Direction}");
-                        break;
-                    case StrokeSize size:
-                        WriteLine($"Change brush stroke size to {size.Size}");
-                        break;
-                    default:
-                        return unit;
-                }
-                return unit;
-            });
-            return unit;
-        }
-
-        Unit DrawPoint(Point point)
-        {
-            this.inkCanvas1.Strokes.Add(
-                new Stroke(new StylusPointCollection(new List<Point> { point }), new DrawingAttributes()));
-
-            return unit;
         }
     }
 }
