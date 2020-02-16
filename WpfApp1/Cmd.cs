@@ -1,18 +1,19 @@
-﻿namespace PenApp
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace WpfApp1
 {
     public abstract class Cmd { }
 
     public class StrokeSize : Cmd
     {
-        public StrokeSize(int size)
-        {
+        public StrokeSize(int size) =>
             this.Size = size;
-        }
 
         public int Size { get; }
     }
     public class PenUp : Cmd { }
-
     public class PenDown : Cmd { }
 
     public enum Directions { North, South, East, West }
@@ -20,24 +21,14 @@
     public class Direction : Cmd
     {
         public Directions Value { get; set; }
-        public Direction(char direction)
-        {
-            switch (direction)
-            {
-                case 'N':
-                    this.Value = Directions.North;
-                    break;
-                case 'S':
-                    this.Value = Directions.South;
-                    break;
-                case 'E':
-                    this.Value = Directions.East;
-                    break;
-                default:
-                    this.Value = Directions.West;
-                    break;
-            }
-        }
+        public Direction(char direction) =>
+            Value = direction switch
+                {
+                'N' => Directions.North,
+                'S' => Directions.South,
+                'E' => Directions.East,
+                _ => Directions.West
+                };
     }
 
     public class Move : Cmd
