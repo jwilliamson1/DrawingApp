@@ -1,16 +1,19 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="CodeGeneration.Roslyn.BuildTime" Version="0.6.1" PrivateAssets="all" />
-    <PackageReference Include="LanguageExt.CodeGen" Version="3.3.51" PrivateAssets="all"/>
+  <ItemGroup>    
     <PackageReference Include="LanguageExt.Parsec" Version="3.3.51" />
-    <DotNetCliToolReference Include="dotnet-codegen" Version="0.6.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Instructions.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

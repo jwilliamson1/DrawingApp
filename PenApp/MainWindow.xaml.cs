@@ -35,25 +35,14 @@ namespace PenApp
             var parseResult = Parsers.ParseCommands(text);
 
             var res = from cmds in parseResult
-                      select SeqExt.mapAccumL(InterpretCmds, SpecificPoint.Default(), cmds);
+                      select SeqExt.mapAccumL(InterpretCmds, SpecificPoint.DefaultStartingPoint(), cmds);
 
             res.Match(_ => WriteLine("Success!"), WriteLine);
         }
 
-        [With]
-        public partial class SpecificPoint
+        public record SpecificPoint(Point Point, bool Draw, int BrushSize)
         {
-            public readonly Point Point;
-            public readonly bool Draw;
-            public readonly int BrushSize;
-            public SpecificPoint(Point point, bool draw, int brushSize)
-            {
-                this.Point = point;
-                this.Draw = draw;
-                this.BrushSize = brushSize;
-            }
-
-            public static SpecificPoint Default()
+            public static SpecificPoint DefaultStartingPoint()
             {
                 return new SpecificPoint(new Point(0, 0), false, 2);
             }
@@ -61,54 +50,54 @@ namespace PenApp
 
         (SpecificPoint, Seq<SpecificPoint>) InterpretCmds(SpecificPoint specificPoint, Cmd cmd)
         {
-            switch (cmd)
+            return cmd switch
             {
-                case PenUp pup:
-                    return (specificPoint.With(Draw: false), List(PenUpHandler(pup, specificPoint)).ToSeq());
-                case PenDown pdown:
-                    return (specificPoint.With(Draw: true), List(PenDownHandler(pdown, specificPoint)).ToSeq());
-                case StrokeSize size:
-                    return (specificPoint.With(BrushSize: specificPoint.BrushSize), List(StrokeSizeHandler(size, specificPoint)).ToSeq());
-                case Move move:
-                    return MoveHandler(move, specificPoint);
-                    
-            }
-            throw new InvalidOperationException("Should never get here");
+                PenUp pup => (specificPoint with { Draw = false }, Seq1(PenUpHandler(pup, specificPoint))),
+                PenDown pdown => (specificPoint with { Draw = true }, Seq1(PenDownHandler(pdown, specificPoint))),
+                StrokeSize size => (specificPoint with { BrushSize = specificPoint.BrushSize }, Seq1(StrokeSizeHandler(size, specificPoint))),
+                Move move => MoveHandler(move, specificPoint),
+                _ => throw new InvalidOperationException("Should never get here"),
+            };
         }
 
         SpecificPoint PenUpHandler(PenUp cmd, SpecificPoint specPoint) =>
-            specPoint.With(Draw: false);
+            specPoint with { Draw = false };
 
         SpecificPoint PenDownHandler(PenDown cmd, SpecificPoint specPoint) =>
-            specPoint.With(Draw: true);
+            specPoint with { Draw = true };
 
         SpecificPoint StrokeSizeHandler(StrokeSize cmd, SpecificPoint specificPoint) =>
-            specificPoint.With(BrushSize: cmd.Size);
+            specificPoint with { BrushSize = cmd.Size };
 
         (SpecificPoint, Seq<SpecificPoint>) MoveHandler(Move cmd, SpecificPoint specificPoint)
         {
             var direction = cmd.Direction;
 
             var curX = (int)specificPoint.Point.X;
-            var curY =(int) specificPoint.Point.Y;
+            var curY = (int) specificPoint.Point.Y;
             var paces = cmd.Paces;
 
-            switch(cmd.Direction)
+            var directionList = cmd.Direction switch
             {
-                case Directions.South:
-                    return (specificPoint.With(Point: new Point(curX, curY + paces)), Enumerable.Range(curY, paces).Map(y => specificPoint.With(Point: new Point(curX, y)))
-                        .ToSeq());
-                case Directions.East:
-                    return (specificPoint.With(Point: new Point(curX + paces, curY)), Enumerable.Range(curX, paces).Map(x => specificPoint.With(Point: new Point(x, curY)))
-                        .ToSeq());
-                case Directions.North:
-                    return (specificPoint.With(Point: new Point(curX, curY - paces)),Enumerable.Range(-1 *curY, paces).Map(y => specificPoint.With(Point: new Point(curX, Math.Abs(y))))
-                        .ToSeq());
-                default:
-                case Directions.West:
-                    return (specificPoint.With(Point: new Point(curX - paces, curY)), Enumerable.Range(-1 * curX, paces).Map(x => specificPoint.With(Point: new Point(Math.Abs(x), curY)))
-                        .ToSeq());
-            }
+                Directions.South =>
+                    (specificPoint with { Point = new Point(curX, curY + paces) }, 
+                    Enumerable.Range(curY, paces)
+                        .Map(y => specificPoint with { Point = new Point(curX, y) })),
+                Directions.East =>
+                    (specificPoint with { Point = new Point(curX + paces, curY) }, 
+                    Enumerable.Range(curX, paces)
+                        .Map(x => specificPoint with { Point = new Point(x, curY) })),
+                Directions.North => 
+                    (specificPoint with { Point = new Point(curX, curY - paces) }, 
+                    Enumerable.Range(-1 * curY, paces)
+                        .Map(y => specificPoint with { Point = new Point(curX, Math.Abs(y)) })),
+                _ => 
+                    (specificPoint with { Point = new Point(curX - paces, curY) }, 
+                    Enumerable.Range(-1 * curX, paces)
+                        .Map(x => specificPoint with { Point = new Point(Math.Abs(x), curY) })),
+            };
+
+            return map(directionList, (f, l) => (f, l.ToSeq()));
         }
 
         Unit Interpret(Seq<Cmd> cmds)
