@@ -45,37 +45,6 @@ namespace WpfApp1
             var result = parse(many1(attempt(line)), text);
 
             return result.ToEither().MapLeft(Error.New);
-
-            //var interpreted = from cmds in result.ToEither()
-            //  select Interpret(cmds);
-
-            //return interpreted;
-        }
-
-        static Either<string, Unit> Interpret(Seq<Cmd> cmds)
-        {
-            cmds.Iter((cmd) =>
-            {
-                switch (cmd)
-                {
-                    case PenUp pup:
-                        Console.WriteLine("Pen up");
-                        break;
-                    case PenDown pdown:
-                        Console.WriteLine("Pen Down");
-                        break;
-                    case Move mv:
-                        Console.WriteLine($"Move {mv.Paces} to the {mv.Direction}");
-                        break;
-                    case StrokeSize size:
-                        Console.WriteLine($"Change brush stroke size to {size.Size}");
-                        break;
-                    default:
-                        Left("Unable to intepret");
-                        break;
-                }
-            });
-            return Right(unit);
         }
     }
 }

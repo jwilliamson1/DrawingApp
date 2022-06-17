@@ -18,7 +18,8 @@ namespace WpfApp1
             BrushSize = brushSize;
         }
 
-        public static readonly SpecificPoint Default = new SpecificPoint(new Point(0, 0), false, 2);
+        // should calculate center from canvas height and width
+        public static readonly SpecificPoint Default = new SpecificPoint(new Point(200, 200), false, 2);
 
         public SpecificPoint With(Point? Point = null, bool? Draw = null, int? BrushSize = null) =>
             new SpecificPoint(Point ?? this.Point, Draw ?? this.Draw, BrushSize ?? this.BrushSize);

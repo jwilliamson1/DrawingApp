@@ -10,4 +10,10 @@
     <PackageReference Include="LanguageExt.Parsec" Version="3.4.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="drawing-instructions\Instructions.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
