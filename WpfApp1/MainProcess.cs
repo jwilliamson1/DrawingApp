@@ -42,9 +42,6 @@ namespace WpfApp1
             return results;
         }
 
-        static Either<Error, (SpecificPoint Current, Seq<SpecificPoint> Points)> InitialState =>
-            Right((SpecificPoint.Default, Seq<SpecificPoint>()));
-
         static Either<Error, Unit> InitialRunnerState => Right(unit);
 
         static Func<string, Either<Error, Unit>> createRunner(
@@ -80,11 +77,15 @@ namespace WpfApp1
             Try(() => ReadAllText(path)).ToEither().MapLeft(Error.New);
 
         static Either<Error, Seq<SpecificPoint>> GeneratePoints(Seq<Cmd> cmds) =>
-            cmds.FoldWhile(InitialState,
+            cmds.FoldWhile(InitialWritingState,
                       (state, cmd) => from s in state
                                       from r in InterpretCmds(s.Current, cmd)
                                       select (r.Current, s.Points + r.Points),
                       state => state.IsRight)
                 .Map(state => state.Points);
+
+        
+        static Either<Error, (SpecificPoint Current, Seq<SpecificPoint> Points)> InitialWritingState =>
+            Right((SpecificPoint.Default, Seq<SpecificPoint>()));
     }
 }
